@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Kelas {
+  id         String    @id @default(cuid())
+  tingkat    String    // X, XI, XII
+  jurusan    String    // BUSANA, KECANTIKAN, KULINER, PERHOTOLAN, PPLG, TJKT, ULW, ULP
+  nomor      Int       // 1, 2, 3 (untuk lokal/kelas paralel)
+  nama_kelas String    @unique // X BUSANA 1, XI PPLG 2, dst
+  wali_kelas String?
+  siswa      Siswa[]
+  anggota    Anggota[]
+  createdAt  DateTime  @default(now())
+}
+
+model Siswa {
+  id        String      @id @default(cuid())
+  nisn      String      @unique
+  nama      String
+  kelas     String      // legacy field, keep for backward compat
+  kelasId   String?
+  kelasRef  Kelas?      @relation(fields: [kelasId], references: [id])
+  transaksi Transaksi[]
+  createdAt DateTime    @default(now())
+}
+
+// Anggota perpustakaan (SISWA, GURU, STAF)
+model Anggota {
+  id           String         @id @default(cuid())
+  no_anggota   String         @unique // Auto-generate: A0001, A0002
+  nama         String
+  jenis        JenisAnggota   @default(SISWA)
+  
+  // Khusus SISWA
+  nisn         String?
+  kelasId      String?
+  kelasRef     Kelas?         @relation(fields: [kelasId], references: [id])
+  
+  // Khusus GURU/STAF
+  telepon      String?
+  alamat       String?
+  
+  status_aktif Boolean        @default(true)
+  transaksi    Transaksi[]
+  createdAt    DateTime       @default(now())
+  
+  @@index([no_anggota])
+}
+
+model Buku {
+  id            String      @id @default(cuid())
+  tipe_buku     TipeBuku    @default(BIASA)
+  kode_buku     String?     @unique
+  judul         String
+  penulis       String
+  kategori      String?
+  klasifikasi   String?     // nomor DDC, mis. "808.81", "278.250"
+  tahun_ajaran  String?
+  cover_url     String?
+  stok_total    Int         @default(1)
+  stok_tersedia Int         @default(1)
+  is_referensi  Boolean     @default(false) // Koleksi Referensi (awalan R di call number) — hanya baca di tempat
+  
+  eksemplar     Eksemplar[]
+  transaksi     Transaksi[]
+  ulasan        Ulasan[]
+  createdAt     DateTime    @default(now())
+}
+
+// Eksemplar - copy fisik buku
+model Eksemplar {
+  id           String          @id @default(cuid())
+  kode         String          @unique // 8-digit: 00001234 (dibaca scanner)
+  buku         Buku            @relation(fields: [bukuId], references: [id], onDelete: Cascade)
+  bukuId       String
+  rakId        String?
+  rak          Rak?            @relation(fields: [rakId], references: [id])
+  tipe_koleksi String          @default("Reference") // Reference, Fiction
+  status       StatusEksemplar @default(TERSEDIA)
+  transaksi    Transaksi[]
+  createdAt    DateTime        @default(now())
+  
+  @@index([kode])
+  @@index([bukuId])
+  @@index([rakId])
+}
+
+// Ulasan buku dari siswa
+model Ulasan {
+  id        String   @id @default(cuid())
+  bukuId    String
+  buku      Buku     @relation(fields: [bukuId], references: [id], onDelete: Cascade)
+  nama      String
+  rating    Int      // 1-5
+  komentar  String   @db.Text
+  createdAt DateTime @default(now())
+  
+  @@index([bukuId])
+}
+
+model Transaksi {
+  id                String           @id @default(cuid())
+  jenis_peminjaman  JenisPeminjaman  @default(INDIVIDUAL)
+  tipe_buku         TipeBuku         @default(BIASA)
+  
+  // Relasi lama (backward compat)
+  siswa             Siswa?           @relation(fields: [siswaId], references: [id])
+  siswaId           String?
+  buku              Buku?            @relation(fields: [bukuId], references: [id])
+  bukuId            String?
+  
+  // Relasi baru
+  anggota           Anggota?         @relation(fields: [anggotaId], references: [id])
+  anggotaId         String?
+  eksemplar         Eksemplar?       @relation(fields: [eksemplarId], references: [id])
+  eksemplarId       String?
+  
+  tgl_pinjam        DateTime         @default(now())
+  batas_kembali     DateTime
+  tgl_dikembalikan  DateTime?
+  status            Status           @default(DIPINJAM)
+  denda             Int              @default(0)
+  perpanjangan_count Int             @default(0) // maksimal 1x perpanjangan
+  groupId           String?
+  createdAt         DateTime         @default(now())
+
+  @@index([groupId])
+  @@index([anggotaId])
+  @@index([eksemplarId])
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  nama      String
+  createdAt DateTime @default(now())
+}
+
+// Lokasi fisik penyimpanan: Rak 1-8 (klasifikasi DDC) + Lemari Referensi
+model Rak {
+  id              String      @id @default(cuid())
+  nama            String      @unique // "Rak 1", "Rak 2", ..., "Lemari Referensi 2"
+  nomor           Int         @unique
+  klasifikasi_min Int         // 0, 100, 200, ...
+  klasifikasi_max Int         // 9, 199, 299, ...
+  eksemplar       Eksemplar[]
+  createdAt       DateTime    @default(now())
+}
+
+enum Status {
+  DIPINJAM
+  SELESAI
+}
+
+enum StatusEksemplar {
+  TERSEDIA
+  DIPINJAM
+  RUSAK
+  HILANG
+}
+
+enum JenisPeminjaman {
+  INDIVIDUAL
+  PAKET
+}
+
+enum TipeBuku {
+  BIASA    // Buku biasa peminjaman individual, durasi fleksibel
+  MAPEL    // Buku mata pelajaran / LKS, paket per kelas, ganti per tahun ajaran
+}
+
+enum JenisAnggota {
+  SISWA
+  GURU
+  STAF
+}

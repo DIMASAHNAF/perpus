@@ -1,0 +1,46 @@
+model Siswa {
+  id        String      @id @default(uuid())
+  nisn      String      @unique
+  nama      String
+  kelas     String
+  transaksi Transaksi[]
+  createdAt DateTime    @default(now())
+}
+
+model Buku {
+  id            String      @id @default(uuid())
+  judul         String
+  penulis       String
+  cover_url     String?
+  stok_total    Int         @default(1)
+  stok_tersedia Int         @default(1)
+  transaksi     Transaksi[]
+  createdAt     DateTime    @default(now())
+}
+
+model Transaksi {
+  id               String    @id @default(uuid())
+  siswa            Siswa     @relation(fields: [siswaId], references: [id])
+  siswaId          String
+  buku             Buku      @relation(fields: [bukuId], references: [id])
+  bukuId           String
+  tgl_pinjam       DateTime  @default(now())
+  batas_kembali    DateTime
+  tgl_dikembalikan DateTime?
+  status           Status    @default(DIPINJAM)
+  denda            Int       @default(0)
+  createdAt        DateTime  @default(now())
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  nama      String
+  createdAt DateTime @default(now())
+}
+
+enum Status {
+  DIPINJAM
+  SELESAI
+}

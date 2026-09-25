@@ -1,0 +1,350 @@
+[
+  {
+    "id": "cmu5csfhk0001vitkokf6vpzj",
+    "kode": "00000001",
+    "bukuId": "cmu5ckn8d000bvi9gklthv5v0",
+    "lokasi_rak": "A-1"
+  },
+  {
+    "id": "cmu5cshjt0003vitki5bbqjrf",
+    "kode": "00000002",
+    "bukuId": "cmu5ckn8d000bvi9gklthv5v0",
+    "lokasi_rak": "B-1"
+  },
+  {
+    "id": "cmu5csjlf0005vitktpq7f9u0",
+    "kode": "00000003",
+    "bukuId": "cmu5ckn8d000bvi9gklthv5v0",
+    "lokasi_rak": "C-1"
+  },
+  {
+    "id": "cmu5csln20007vitk6gyrioai",
+    "kode": "00000004",
+    "bukuId": "cmu5cko8f000cvi9gwi8sh9i9",
+    "lokasi_rak": "D-1"
+  },
+  {
+    "id": "cmu5csnw90009vitkvtud1ln0",
+    "kode": "00000005",
+    "bukuId": "cmu5cko8f000cvi9gwi8sh9i9",
+    "lokasi_rak": "E-1"
+  },
+  {
+    "id": "cmu5cspxw000bvitksiyaeku3",
+    "kode": "00000006",
+    "bukuId": "cmu5ckp8d000dvi9gw2dghnkk",
+    "lokasi_rak": "F-1"
+  },
+  {
+    "id": "cmu5css6n000dvitk63cc2qy6",
+    "kode": "00000007",
+    "bukuId": "cmu5ckp8d000dvi9gw2dghnkk",
+    "lokasi_rak": "G-1"
+  },
+  {
+    "id": "cmu5csu89000fvitkr8id7s6d",
+    "kode": "00000008",
+    "bukuId": "cmu5ckp8d000dvi9gw2dghnkk",
+    "lokasi_rak": "H-1"
+  },
+  {
+    "id": "cmu5csw9x000hvitkfxlkq7nh",
+    "kode": "00000009",
+    "bukuId": "cmu5ckp8d000dvi9gw2dghnkk",
+    "lokasi_rak": "I-1"
+  },
+  {
+    "id": "cmu5csybh000jvitkkc6bo65u",
+    "kode": "00000010",
+    "bukuId": "cmu5ckq8b000evi9g3e88964n",
+    "lokasi_rak": "J-1"
+  },
+  {
+    "id": "cmu5ct0kj000lvitksdu8xc48",
+    "kode": "00000011",
+    "bukuId": "cmu5ckq8b000evi9g3e88964n",
+    "lokasi_rak": "K-1"
+  },
+  {
+    "id": "cmu5ct2m5000nvitkzqa7e41t",
+    "kode": "00000012",
+    "bukuId": "cmu5ckq8b000evi9g3e88964n",
+    "lokasi_rak": "L-1"
+  },
+  {
+    "id": "cmu5ct4uy000pvitk7wao5yfu",
+    "kode": "00000013",
+    "bukuId": "cmu5ckr88000fvi9ga6qdyb7l",
+    "lokasi_rak": "M-1"
+  },
+  {
+    "id": "cmu5ct6wj000rvitk34n1pqsm",
+    "kode": "00000014",
+    "bukuId": "cmu5ckr88000fvi9ga6qdyb7l",
+    "lokasi_rak": "N-1"
+  },
+  {
+    "id": "cmu5ct8y3000tvitkthwtqnl8",
+    "kode": "00000015",
+    "bukuId": "cmu5cks89000gvi9g9b8fck65",
+    "lokasi_rak": "O-1"
+  },
+  {
+    "id": "cmu5ctazp000vvitk8txt2oqg",
+    "kode": "00000016",
+    "bukuId": "cmu5cks89000gvi9g9b8fck65",
+    "lokasi_rak": "P-1"
+  },
+  {
+    "id": "cmu5ctd8v000xvitkup2wl0ii",
+    "kode": "00000017",
+    "bukuId": "cmu5cks89000gvi9g9b8fck65",
+    "lokasi_rak": "Q-1"
+  },
+  {
+    "id": "cmu5ctfag000zvitk0lfk57ta",
+    "kode": "00000018",
+    "bukuId": "cmu5ckt89000hvi9g49fyncck",
+    "lokasi_rak": "R-1"
+  },
+  {
+    "id": "cmu5cthj80011vitkai0z0ha0",
+    "kode": "00000019",
+    "bukuId": "cmu5ckt89000hvi9g49fyncck",
+    "lokasi_rak": "S-1"
+  },
+  {
+    "id": "cmu5ctjku0013vitk5dk50gtn",
+    "kode": "00000020",
+    "bukuId": "cmu5ckt89000hvi9g49fyncck",
+    "lokasi_rak": "T-1"
+  },
+  {
+    "id": "cmu5ctlmf0015vitkhzvzm5uj",
+    "kode": "00000021",
+    "bukuId": "cmu5ckt89000hvi9g49fyncck",
+    "lokasi_rak": "U-1"
+  },
+  {
+    "id": "cmu5ctnnz0017vitk0exvv62z",
+    "kode": "00000022",
+    "bukuId": "cmu5ckt89000hvi9g49fyncck",
+    "lokasi_rak": "V-1"
+  },
+  {
+    "id": "cmu5ctpx10019vitklfioaed4",
+    "kode": "00000023",
+    "bukuId": "cmu5cku85000ivi9g7qr2ufcs",
+    "lokasi_rak": "W-1"
+  },
+  {
+    "id": "cmu5ctrym001bvitk6arcru27",
+    "kode": "00000024",
+    "bukuId": "cmu5cku85000ivi9g7qr2ufcs",
+    "lokasi_rak": "X-1"
+  },
+  {
+    "id": "cmu5ctu7e001dvitkm8sqvjy2",
+    "kode": "00000025",
+    "bukuId": "cmu5cku85000ivi9g7qr2ufcs",
+    "lokasi_rak": "Y-1"
+  },
+  {
+    "id": "cmu5ctw90001fvitkxktu6bco",
+    "kode": "00000026",
+    "bukuId": "cmu5cku85000ivi9g7qr2ufcs",
+    "lokasi_rak": "Z-1"
+  },
+  {
+    "id": "cmu5ctyc0001hvitks2wglcb4",
+    "kode": "00000027",
+    "bukuId": "cmu5ckv87000jvi9gj3eliw1s",
+    "lokasi_rak": "A-2"
+  },
+  {
+    "id": "cmu5cu0dm001jvitkqr703fs8",
+    "kode": "00000028",
+    "bukuId": "cmu5ckv87000jvi9gj3eliw1s",
+    "lokasi_rak": "B-2"
+  },
+  {
+    "id": "cmu5cu2mq001lvitklwdx07hh",
+    "kode": "00000029",
+    "bukuId": "cmu5ckv87000jvi9gj3eliw1s",
+    "lokasi_rak": "C-2"
+  },
+  {
+    "id": "cmu5cu4od001nvitk6xeis5t8",
+    "kode": "00000030",
+    "bukuId": "cmu5ckwf9000kvi9go4ujm1u4",
+    "lokasi_rak": "D-2"
+  },
+  {
+    "id": "cmu5cu6x8001pvitk2qmtafz7",
+    "kode": "00000031",
+    "bukuId": "cmu5ckwf9000kvi9go4ujm1u4",
+    "lokasi_rak": "E-2"
+  },
+  {
+    "id": "cmu5cu8yt001rvitkjwjmwrq9",
+    "kode": "00000032",
+    "bukuId": "cmu5ckwf9000kvi9go4ujm1u4",
+    "lokasi_rak": "F-2"
+  },
+  {
+    "id": "cmu5cub0e001tvitkkm6ahlxo",
+    "kode": "00000033",
+    "bukuId": "cmu5ckwf9000kvi9go4ujm1u4",
+    "lokasi_rak": "G-2"
+  },
+  {
+    "id": "cmu5cud22001vvitkuml3sj4r",
+    "kode": "00000034",
+    "bukuId": "cmu5ckwf9000kvi9go4ujm1u4",
+    "lokasi_rak": "H-2"
+  },
+  {
+    "id": "cmu5cufb5001xvitkfivx153f",
+    "kode": "00000035",
+    "bukuId": "cmu5ckwf9000kvi9go4ujm1u4",
+    "lokasi_rak": "I-2"
+  },
+  {
+    "id": "cmu5cuhcq001zvitk7ldnrmhr",
+    "kode": "00000036",
+    "bukuId": "cmu5ckxf7000lvi9g4ba98g8x",
+    "lokasi_rak": "J-2"
+  },
+  {
+    "id": "cmu5cujlh0021vitkl3q5849y",
+    "kode": "00000037",
+    "bukuId": "cmu5ckxf7000lvi9g4ba98g8x",
+    "lokasi_rak": "K-2"
+  },
+  {
+    "id": "cmu5culn10023vitkn2z39bd0",
+    "kode": "00000038",
+    "bukuId": "cmu5ckxf7000lvi9g4ba98g8x",
+    "lokasi_rak": "L-2"
+  },
+  {
+    "id": "cmu5cunon0025vitksgrwts6p",
+    "kode": "00000039",
+    "bukuId": "cmu5ckxf7000lvi9g4ba98g8x",
+    "lokasi_rak": "M-2"
+  },
+  {
+    "id": "cmu5cupqf0027vitk0jd5ckp6",
+    "kode": "00000040",
+    "bukuId": "cmu5ckyf4000mvi9ga1k9ppco",
+    "lokasi_rak": "N-2"
+  },
+  {
+    "id": "cmu5curzk0029vitk3519nftq",
+    "kode": "00000041",
+    "bukuId": "cmu5ckyf4000mvi9ga1k9ppco",
+    "lokasi_rak": "O-2"
+  },
+  {
+    "id": "cmu5cuu14002bvitk7wubzncm",
+    "kode": "00000042",
+    "bukuId": "cmu5ckyf4000mvi9ga1k9ppco",
+    "lokasi_rak": "P-2"
+  },
+  {
+    "id": "cmu5cuw9w002dvitk84q8v9nj",
+    "kode": "00000043",
+    "bukuId": "cmu5ckyf4000mvi9ga1k9ppco",
+    "lokasi_rak": "Q-2"
+  },
+  {
+    "id": "cmu5cuybg002fvitksot9p4e6",
+    "kode": "00000044",
+    "bukuId": "cmu5ckyf4000mvi9ga1k9ppco",
+    "lokasi_rak": "R-2"
+  },
+  {
+    "id": "cmu5cv0d4002hvitki1wpzbqr",
+    "kode": "00000045",
+    "bukuId": "cmu5ckzf2000nvi9gtdly560m",
+    "lokasi_rak": "S-2"
+  },
+  {
+    "id": "cmu5cv2ep002jvitk7hs7455l",
+    "kode": "00000046",
+    "bukuId": "cmu5ckzf2000nvi9gtdly560m",
+    "lokasi_rak": "T-2"
+  },
+  {
+    "id": "cmu5cv4nt002lvitks0lf3iwf",
+    "kode": "00000047",
+    "bukuId": "cmu5ckzf2000nvi9gtdly560m",
+    "lokasi_rak": "U-2"
+  },
+  {
+    "id": "cmu5cv6pf002nvitkxztvjv0v",
+    "kode": "00000048",
+    "bukuId": "cmu5ckzf2000nvi9gtdly560m",
+    "lokasi_rak": "V-2"
+  },
+  {
+    "id": "cmu5cv8y5002pvitky14ak7oa",
+    "kode": "00000049",
+    "bukuId": "cmu5ckzf2000nvi9gtdly560m",
+    "lokasi_rak": "W-2"
+  },
+  {
+    "id": "cmu5cvazo002rvitkgxyiz96l",
+    "kode": "00000050",
+    "bukuId": "cmu5ckzf2000nvi9gtdly560m",
+    "lokasi_rak": "X-2"
+  },
+  {
+    "id": "cmu5cvd19002tvitkvcpgni5h",
+    "kode": "00000051",
+    "bukuId": "cmu5ckzf2000nvi9gtdly560m",
+    "lokasi_rak": "Y-2"
+  },
+  {
+    "id": "cmu5cvf2t002vvitkp4syvdop",
+    "kode": "00000052",
+    "bukuId": "cmu5cl0ex000ovi9gmgr3zqwt",
+    "lokasi_rak": "Z-2"
+  },
+  {
+    "id": "cmu5cvhc0002xvitk7ovlrz27",
+    "kode": "00000053",
+    "bukuId": "cmu5cl0ex000ovi9gmgr3zqwt",
+    "lokasi_rak": "A-3"
+  },
+  {
+    "id": "cmu5cvjdo002zvitkfs6nw99f",
+    "kode": "00000054",
+    "bukuId": "cmu5cl0ex000ovi9gmgr3zqwt",
+    "lokasi_rak": "B-3"
+  },
+  {
+    "id": "cmu5cvlmg0031vitk1ww65i2u",
+    "kode": "00000055",
+    "bukuId": "cmu5cl0ex000ovi9gmgr3zqwt",
+    "lokasi_rak": "C-3"
+  },
+  {
+    "id": "cmu5cvno00033vitkeosg04ww",
+    "kode": "00000056",
+    "bukuId": "cmu5cl1y1000pvi9gcb4r5qol",
+    "lokasi_rak": "D-3"
+  },
+  {
+    "id": "cmu5cvppm0035vitkogduodye",
+    "kode": "00000057",
+    "bukuId": "cmu5cl1y1000pvi9gcb4r5qol",
+    "lokasi_rak": "E-3"
+  },
+  {
+    "id": "cmu5cvrr70037vitkr5mlp4km",
+    "kode": "00000058",
+    "bukuId": "cmu5cl1y1000pvi9gcb4r5qol",
+    "lokasi_rak": "F-3"
+  }
+]

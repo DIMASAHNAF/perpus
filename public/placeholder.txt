@@ -1,0 +1,2 @@
+// Placeholder image for book covers
+export const PLACEHOLDER_IMG = "/placeholder-book.png";
