@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Kelas {
@@ -64,6 +63,8 @@ model Buku {
   klasifikasi   String?     // nomor DDC, mis. "808.81", "278.250"
   tahun_ajaran  String?
   cover_url     String?
+  file_url      String?     // URL file PDF / e-book digital
+  is_ebook      Boolean     @default(false)
   stok_total    Int         @default(1)
   stok_tersedia Int         @default(1)
   is_referensi  Boolean     @default(false) // Koleksi Referensi (awalan R di call number) — hanya baca di tempat
@@ -82,10 +83,11 @@ model Eksemplar {
   bukuId       String
   rakId        String?
   rak          Rak?            @relation(fields: [rakId], references: [id])
-  tipe_koleksi String          @default("Reference") // Reference, Fiction
-  status       StatusEksemplar @default(TERSEDIA)
-  transaksi    Transaksi[]
-  createdAt    DateTime        @default(now())
+  tipe_koleksi     String            @default("Reference") // Reference, Fiction
+  status           StatusEksemplar   @default(TERSEDIA)
+  transaksi        Transaksi[]
+  stockOpnameItems StockOpnameItem[]
+  createdAt        DateTime          @default(now())
   
   @@index([kode])
   @@index([bukuId])
@@ -99,7 +101,7 @@ model Ulasan {
   buku      Buku     @relation(fields: [bukuId], references: [id], onDelete: Cascade)
   nama      String
   rating    Int      // 1-5
-  komentar  String   @db.Text
+  komentar  String
   createdAt DateTime @default(now())
   
   @@index([bukuId])
@@ -144,6 +146,18 @@ model Admin {
   createdAt DateTime @default(now())
 }
 
+// Kunjungan pengunjung perpustakaan (input manual petugas)
+model Kunjungan {
+  id        String   @id @default(cuid())
+  nama      String
+  kelas     String?  // contoh: "X PPLG 1" untuk siswa
+  keperluan String?  // membaca, meminjam, belajar, tugas, dll
+  tanggal   DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([tanggal])
+}
+
 // Lokasi fisik penyimpanan: Rak 1-8 (klasifikasi DDC) + Lemari Referensi
 model Rak {
   id              String      @id @default(cuid())
@@ -152,7 +166,67 @@ model Rak {
   klasifikasi_min Int         // 0, 100, 200, ...
   klasifikasi_max Int         // 9, 199, 299, ...
   eksemplar       Eksemplar[]
+  stockOpname     StockOpname[]
   createdAt       DateTime    @default(now())
+}
+
+// Sesi Audit / Stock Opname Koleksi Fisik
+model StockOpname {
+  id              String             @id @default(cuid())
+  nama_sesi       String
+  petugas         String?
+  tanggal_mulai   DateTime           @default(now())
+  tanggal_selesai DateTime?
+  status          StatusStockOpname  @default(BERJALAN)
+  rakId           String?            // null jika mencakup semua rak
+  rakRef          Rak?               @relation(fields: [rakId], references: [id])
+  catatan         String?
+  items           StockOpnameItem[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([status])
+  @@index([rakId])
+}
+
+// Item hasil pemeriksaan eksemplar dalam sesi stock opname
+model StockOpnameItem {
+  id              String              @id @default(cuid())
+  stockOpnameId   String
+  stockOpname     StockOpname         @relation(fields: [stockOpnameId], references: [id], onDelete: Cascade)
+  eksemplarId     String
+  eksemplar       Eksemplar           @relation(fields: [eksemplarId], references: [id], onDelete: Cascade)
+  
+  // Snapshot kondisi saat sesi dibuat
+  status_sistem   StatusEksemplar
+  rakId_sistem    String?
+  
+  // Hasil pemeriksaan audit fisik
+  is_terpindai    Boolean             @default(false)
+  status_fisik    StatusFisikOpname?  // BAIK, RUSAK, HILANG
+  rakId_fisik     String?             // Rak tempat buku ditemukan secara fisik
+  waktu_scan      DateTime?
+  catatan         String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@unique([stockOpnameId, eksemplarId])
+  @@index([stockOpnameId])
+  @@index([eksemplarId])
+  @@index([is_terpindai])
+}
+
+enum StatusStockOpname {
+  DRAFT
+  BERJALAN
+  SELESAI
+  DIBATALKAN
+}
+
+enum StatusFisikOpname {
+  BAIK
+  RUSAK
+  HILANG
 }
 
 enum Status {
@@ -182,3 +256,4 @@ enum JenisAnggota {
   GURU
   STAF
 }
+

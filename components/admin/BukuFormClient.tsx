@@ -1,206 +1,267 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { IsbnFetcher } from "@/components/admin/IsbnFetcher";
 import { VoiceNoteBuku } from "@/components/admin/VoiceNoteBuku";
 import { VoiceInput } from "@/components/ui/VoiceInput";
+import { EbookUploadField } from "@/components/admin/EbookUploadField";
+import { CoverUploadField } from "@/components/admin/CoverUploadField";
+import { Save, BookOpen, User, Tag, Layers, Bookmark } from "lucide-react";
+import Link from "next/link";
 
 type Prefill = {
   judul: string;
   penulis: string;
   cover_url: string | null;
   kategori?: string | null;
+  klasifikasi?: string | null;
 };
 
-/**
- * Wrapper client untuk form tambah buku:
- * - IsbnFetcher prefill judul/penulis/cover
- * - VoiceInput untuk judul/penulis
- * - Submit tetap ke server action createBuku
- */
 export function BukuFormClient({
   createBuku,
   mataPelajaran,
   today,
+  initialIsbn,
 }: {
   createBuku: (formData: FormData) => Promise<void>;
   mataPelajaran: string[];
   today: string;
+  initialIsbn?: string;
 }) {
   const [prefill, setPrefill] = useState<Prefill | null>(null);
 
+  useEffect(() => {
+    if (initialIsbn) {
+      const formIsbn = document.querySelector<HTMLInputElement>('input[name="isbn"]');
+      if (formIsbn) {
+        formIsbn.value = initialIsbn;
+        formIsbn.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      const formKode = document.querySelector<HTMLInputElement>('input[name="kode_buku"]');
+      if (formKode && !formKode.value) {
+        formKode.value = initialIsbn;
+        formKode.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }
+  }, [initialIsbn]);
+
+  const handlePrefill = (data: Prefill) => {
+    setPrefill(data);
+
+    // Langsung sinkronkan ke elemen DOM untuk jaminan instan 100%
+    setTimeout(() => {
+      const formJudul = document.querySelector<HTMLInputElement>('input[name="judul"]');
+      if (formJudul && data.judul) {
+        formJudul.value = data.judul;
+        formJudul.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+
+      const formPenulis = document.querySelector<HTMLInputElement>('input[name="penulis"]');
+      if (formPenulis && data.penulis) {
+        formPenulis.value = data.penulis;
+        formPenulis.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+
+      const formKategori = document.querySelector<HTMLSelectElement>('select[name="kategori"]');
+      if (formKategori && data.kategori) {
+        formKategori.value = data.kategori;
+        formKategori.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+
+      const formKlasifikasi = document.querySelector<HTMLInputElement>('input[name="klasifikasi"]');
+      if (formKlasifikasi && data.klasifikasi) {
+        formKlasifikasi.value = data.klasifikasi;
+      }
+
+      const formCover = document.querySelector<HTMLInputElement>('input[name="cover_url"]');
+      if (formCover && data.cover_url) {
+        formCover.value = data.cover_url;
+      }
+    }, 50);
+  };
+
   return (
-    <form action={createBuku} className="space-y-5">
-      <IsbnFetcher onFetch={setPrefill} />
+    <form action={createBuku} className="space-y-6">
+      <IsbnFetcher onFetch={handlePrefill} />
       <VoiceNoteBuku />
 
       {/* Tipe Buku */}
-      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
-        <label className="text-xs font-bold text-slate-800">Jenis Buku</label>
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 cursor-pointer">
+      <div className="bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 space-y-3">
+        <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Jenis &amp; Tipe Buku</label>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <label className="flex items-center gap-3 p-3.5 rounded-xl bg-white dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer transition-all shadow-xs">
             <input
               type="radio"
               name="tipe_buku"
               value="BIASA"
               defaultChecked
-              className="cursor-pointer"
+              className="w-4 h-4 text-blue-600 focus:ring-blue-500/30 cursor-pointer"
             />
-            <span className="text-sm font-medium text-slate-700">Buku Biasa</span>
-            <span className="text-xs text-slate-500">
-              (Peminjaman individual, durasi fleksibel)
-            </span>
+            <div>
+              <span className="text-sm font-bold text-slate-900 dark:text-white block">Buku Biasa / Umum</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 block">
+                Peminjaman individual, durasi fleksibel
+              </span>
+            </div>
           </label>
-          <label className="flex items-center gap-2 cursor-pointer">
+
+          <label className="flex items-center gap-3 p-3.5 rounded-xl bg-white dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer transition-all shadow-xs">
             <input
               type="radio"
               name="tipe_buku"
               value="MAPEL"
-              className="cursor-pointer"
+              className="w-4 h-4 text-blue-600 focus:ring-blue-500/30 cursor-pointer"
             />
-            <span className="text-sm font-medium text-slate-700">
-              Buku Mapel / LKS
-            </span>
-            <span className="text-xs text-slate-500">
-              (Paket per kelas, ganti per tahun ajaran)
-            </span>
+            <div>
+              <span className="text-sm font-bold text-slate-900 dark:text-white block">Buku Mapel / LKS</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 block">
+                Paket per kelas, ganti per tahun ajaran
+              </span>
+            </div>
           </label>
         </div>
       </div>
 
-      <div>
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
-          Kode Buku (Unik)
-        </label>
-        <input
-          name="kode_buku"
-          placeholder="Contoh: 001, B-IPA-01, LKS-IPA-2024"
-          className="w-full h-10 border border-slate-300 rounded-lg px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
-        />
-        <p className="text-[11px] text-slate-400 mt-1">
-          Kode unik untuk identifikasi buku (opsional, tapi disarankan)
-        </p>
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            Kode Buku (Unik)
+          </label>
+          <input
+            name="kode_buku"
+            defaultValue={initialIsbn || ""}
+            placeholder="Contoh: 001, B-IPA-01, LKS-IPA-2024"
+            className="w-full h-11 border border-slate-300 dark:border-slate-700/80 rounded-xl px-3.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-white dark:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all font-mono shadow-xs"
+          />
+          <p className="text-[11px] text-slate-500 mt-1">
+            Kode unik identifikasi buku (opsional)
+          </p>
+        </div>
+
+        <div>
+          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            ISBN
+          </label>
+          <input
+            name="isbn"
+            defaultValue={initialIsbn || ""}
+            inputMode="numeric"
+            placeholder="9786021234567 (opsional)"
+            className="w-full h-11 font-mono border border-slate-300 dark:border-slate-700/80 rounded-xl px-3.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-white dark:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all shadow-xs"
+          />
+          <p className="text-[11px] text-slate-500 mt-1">
+            Nomor Standar Buku Internasional
+          </p>
+        </div>
       </div>
 
       <div>
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
-          ISBN
+        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+          <BookOpen className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+          Judul Buku *
         </label>
-        <input
-          name="isbn"
-          inputMode="numeric"
-          placeholder="9786021234567 (opsional)"
-          className="w-full h-10 font-mono border border-slate-300 rounded-lg px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
-        />
-      </div>
-
-      <VoiceInput
-        name="judul"
-        label="Judul Buku (bisa bicara)"
-        required
-        value={prefill?.judul ?? ""}
-        placeholder="Contoh: IPA Terpadu Kelas X, LKS Matematika Kelas XI"
-      />
-
-      <VoiceInput
-        name="penulis"
-        label="Nama Penulis / Pengarang (bisa bicara)"
-        required
-        value={prefill?.penulis ?? ""}
-        placeholder="Contoh: Tim Pengembang, Kementerian Pendidikan"
-      />
-
-      <div>
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
-          Kategori / Mata Pelajaran
-        </label>
-        <select
-          name="kategori"
-          defaultValue={prefill?.kategori ?? ""}
-          className="w-full h-10 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all cursor-pointer"
-        >
-          <option value="">-- Pilih Mata Pelajaran --</option>
-          {mataPelajaran.map((mp) => (
-            <option key={mp} value={mp}>
-              {mp}
-            </option>
-          ))}
-        </select>
-        <p className="text-[11px] text-slate-400 mt-1">
-          Pilih kategori mata pelajaran atau jenis buku
-        </p>
-      </div>
-
-      <div>
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
-          Nomor Klasifikasi DDC
-        </label>
-        <input
-          name="klasifikasi"
-          defaultValue=""
-          placeholder="Contoh: 808.81, 370.1, R 370.1 (R = referensi)"
-          className="w-full h-10 font-mono border border-slate-300 rounded-lg px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
-        />
-        <p className="text-[11px] text-slate-400 mt-1">
-          Penentu lokasi rak: 000-099 → Rak 1 … 800+ → Lemari Referensi. Awalan{" "}
-          <strong>R</strong> = koleksi referensi (hanya baca di tempat)
-        </p>
-      </div>
-
-      <div>
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
-          Tahun Ajaran (Untuk Buku Mapel/LKS)
-        </label>
-        <input
-          name="tahun_ajaran"
-          placeholder="Contoh: 2024/2025, 2025/2026"
-          className="w-full h-10 border border-slate-300 rounded-lg px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
-        />
-      </div>
-
-      <div>
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
-          URL Sampul / Cover
-        </label>
-        <input
-          name="cover_url"
-          type="url"
-          defaultValue={prefill?.cover_url ?? ""}
-          placeholder="https://books.google.com/…"
-          className="w-full h-10 border border-slate-300 rounded-lg px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
-        />
-        <p className="text-[11px] text-slate-400 mt-1">
-          Terisi otomatis dari ISBN. Bisa diubah manual.
-        </p>
-      </div>
-
-      <div>
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
-          Jumlah Stok Awal
-        </label>
-        <input
-          name="stok_total"
-          type="number"
-          min="1"
+        <VoiceInput
+          name="judul"
           required
-          defaultValue="1"
-          className="w-full h-10 border border-slate-300 rounded-lg px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+          placeholder="Masukkan judul buku..."
+          prefillValue={prefill?.judul}
         />
       </div>
 
-      <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+      <div>
+        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+          <User className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+          Penulis / Pengarang *
+        </label>
+        <VoiceInput
+          name="penulis"
+          required
+          placeholder="Nama penulis atau penyusun..."
+          prefillValue={prefill?.penulis}
+        />
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            <Tag className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+            Kategori / Mata Pelajaran
+          </label>
+          <select
+            name="kategori"
+            defaultValue={prefill?.kategori || ""}
+            className="w-full h-11 border border-slate-300 dark:border-slate-700/80 rounded-xl px-3.5 text-sm text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all shadow-xs"
+          >
+            <option value="">-- Pilih Kategori --</option>
+            {mataPelajaran.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            <Bookmark className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+            Klasifikasi / DDC
+          </label>
+          <input
+            name="klasifikasi"
+            placeholder="Contoh: 500 (Sains), 004 (Komputer)"
+            className="w-full h-11 border border-slate-300 dark:border-slate-700/80 rounded-xl px-3.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-white dark:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all font-mono shadow-xs"
+          />
+        </div>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            <Layers className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+            Jumlah Stok Eksemplar *
+          </label>
+          <input
+            name="stok_total"
+            type="number"
+            min="1"
+            defaultValue="1"
+            required
+            className="w-full h-11 border border-slate-300 dark:border-slate-700/80 rounded-xl px-3.5 text-sm text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all font-mono shadow-xs"
+          />
+        </div>
+
+        <div>
+          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            Tahun Ajaran / Terbit
+          </label>
+          <input
+            name="tahun_ajaran"
+            placeholder="Contoh: 2024/2025"
+            className="w-full h-11 border border-slate-300 dark:border-slate-700/80 rounded-xl px-3.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-white dark:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all shadow-xs"
+          />
+        </div>
+      </div>
+
+      {/* Foto Sampul / Cover Upload */}
+      <CoverUploadField initialCoverUrl={prefill?.cover_url} />
+
+      {/* E-Book PDF Upload */}
+      <EbookUploadField />
+
+      <div className="flex items-center gap-3 pt-5 border-t border-slate-200 dark:border-slate-800">
         <button
           type="submit"
-          className="h-10 px-5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 flex items-center gap-2 transition-colors"
+          className="h-11 px-6 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-blue-600/20 active:scale-95"
         >
+          <Save className="w-4 h-4" />
           Simpan Buku
         </button>
-        <a
+        <Link
           href="/admin/buku"
-          className="h-10 px-5 rounded-lg border border-slate-300 text-slate-700 text-sm font-semibold hover:bg-slate-50 flex items-center transition-colors"
+          className="h-11 px-5 rounded-xl border border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-sm font-semibold bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 flex items-center transition-all cursor-pointer shadow-xs"
         >
           Batal
-        </a>
+        </Link>
       </div>
     </form>
   );

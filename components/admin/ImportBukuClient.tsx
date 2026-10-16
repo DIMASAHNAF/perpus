@@ -101,20 +101,19 @@ export function ImportBukuClient() {
   return (
     <div className="space-y-6">
       {/* Upload area */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+      <div className="bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-800/90 shadow-2xl p-6 sm:p-8 space-y-5">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Import Buku Massal</h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Upload file CSV untuk input puluhan/ratusan buku sekaligus. Eksemplar
-              8-digit + lokasi rak ter-generate otomatis.
+            <h2 className="text-lg sm:text-xl font-bold text-white">Upload File CSV</h2>
+            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+              Input puluhan/ratusan buku sekaligus. Eksemplar 8-digit + lokasi rak ter-generate otomatis.
             </p>
           </div>
           <button
             onClick={downloadTemplate}
-            className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg border border-emerald-300 text-emerald-700 text-xs font-semibold hover:bg-emerald-50 transition-colors"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700/80 text-emerald-400 hover:text-emerald-300 text-xs font-bold transition-all cursor-pointer shadow-xs"
           >
-            <FileDown className="w-3.5 h-3.5" />
+            <FileDown className="w-4 h-4" />
             Download Template CSV
           </button>
         </div>
@@ -134,18 +133,20 @@ export function ImportBukuClient() {
               }
             }
           }}
-          className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/50 transition-all"
+          className="border-2 border-dashed border-slate-700/80 hover:border-emerald-500/60 bg-slate-950/60 hover:bg-slate-950/90 rounded-2xl p-8 sm:p-10 text-center cursor-pointer transition-all group"
         >
-          <FileSpreadsheet className="w-10 h-10 text-slate-400 mx-auto mb-2" />
+          <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center mx-auto mb-3 group-hover:scale-105 transition-transform">
+            <FileSpreadsheet className="w-7 h-7" />
+          </div>
           {fileName ? (
-            <p className="text-sm font-semibold text-emerald-700">{fileName}</p>
+            <p className="text-sm font-bold text-emerald-400">{fileName}</p>
           ) : (
-            <p className="text-sm font-medium text-slate-600">
-              Klik atau seret file CSV ke sini
+            <p className="text-sm font-semibold text-slate-200">
+              Klik atau seret file CSV ke area ini
             </p>
           )}
-          <p className="text-[11px] text-slate-400 mt-1">
-            Format: .csv (Excel Save As → CSV UTF-8)
+          <p className="text-xs text-slate-500 mt-1">
+            Format: .csv (Microsoft Excel: Save As → CSV UTF-8)
           </p>
           <input
             ref={fileRef}
@@ -157,8 +158,8 @@ export function ImportBukuClient() {
         </div>
 
         {err && (
-          <div className="flex items-start gap-2 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg px-4 py-3 text-sm">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2.5 bg-rose-500/15 border border-rose-500/30 text-rose-300 rounded-xl px-4 py-3 text-sm">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
             <span className="font-medium">{err}</span>
           </div>
         )}
@@ -167,16 +168,15 @@ export function ImportBukuClient() {
           <button
             onClick={handlePreview}
             disabled={busy === "preview"}
-            className="w-full h-11 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
+            className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center justify-center gap-2 transition-all cursor-pointer"
           >
             {busy === "preview" ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" /> Memproses{` `}
-                {`& auto-klasifikasi...`}
+                <Loader2 className="w-4 h-4 animate-spin" /> Memproses &amp; Validasi Data...
               </>
             ) : (
               <>
-                <Upload className="w-4 h-4" /> Preview & Validasi Data
+                <Upload className="w-4 h-4" /> Preview &amp; Validasi Data
               </>
             )}
           </button>
@@ -185,22 +185,22 @@ export function ImportBukuClient() {
         {/* Hasil import */}
         {result && (
           <div
-            className={`rounded-lg px-4 py-3 text-sm border ${
+            className={`rounded-2xl px-5 py-4 text-sm border ${
               result.ok
-                ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                : "bg-amber-50 border-amber-200 text-amber-700"
+                ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
+                : "bg-amber-500/15 border-amber-500/30 text-amber-300"
             }`}
           >
-            <div className="flex items-center gap-2 font-semibold">
+            <div className="flex items-center gap-2.5 font-bold">
               {result.ok ? (
-                <CheckCircle2 className="w-4 h-4" />
+                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
               ) : (
-                <AlertCircle className="w-4 h-4" />
+                <AlertCircle className="w-5 h-5 text-amber-400" />
               )}
-              {result.pesan}
+              <span>{result.pesan}</span>
             </div>
             {result.errors && result.errors.length > 0 && (
-              <ul className="mt-2 ml-6 text-xs space-y-1 text-rose-600">
+              <ul className="mt-2.5 ml-6 text-xs space-y-1 text-rose-300 list-disc">
                 {result.errors.map((e, i) => (
                   <li key={i}>{e}</li>
                 ))}
@@ -212,20 +212,19 @@ export function ImportBukuClient() {
 
       {/* Preview table */}
       {preview && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+        <div className="bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-800/90 shadow-2xl overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">
+              <h3 className="text-base font-bold text-white">
                 Preview Data ({preview.length} judul)
               </h3>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                Cek data di bawah. Klasifikasi kosong akan diisi otomatis dari
-                ISBN/kategori. Klik &ldquo;Proses Import&rdquo; untuk menyimpan.
+              <p className="text-xs text-slate-400 mt-0.5">
+                Cek data di bawah. Klasifikasi kosong akan diisi otomatis dari ISBN/kategori.
               </p>
             </div>
             <button
               onClick={reset}
-              className="text-slate-400 hover:text-rose-500 transition-colors"
+              className="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
               title="Batal"
             >
               <X className="w-5 h-5" />
@@ -235,47 +234,47 @@ export function ImportBukuClient() {
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="bg-slate-50 text-slate-600 font-semibold text-left">
-                  <th className="px-4 py-2.5">Judul</th>
-                  <th className="px-4 py-2.5">Penulis</th>
-                  <th className="px-4 py-2.5">Kategori</th>
-                  <th className="px-4 py-2.5">DDC</th>
-                  <th className="px-4 py-2.5 text-center">Jumlah</th>
-                  <th className="px-4 py-2.5">ISBN</th>
-                  <th className="px-4 py-2.5">Th. Ajaran</th>
+                <tr className="bg-slate-950/70 text-slate-400 font-bold uppercase tracking-wider text-left">
+                  <th className="px-5 py-3">Judul</th>
+                  <th className="px-5 py-3">Penulis</th>
+                  <th className="px-5 py-3">Kategori</th>
+                  <th className="px-5 py-3">DDC</th>
+                  <th className="px-5 py-3 text-center">Jumlah</th>
+                  <th className="px-5 py-3">ISBN</th>
+                  <th className="px-5 py-3">Th. Ajaran</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-800/60">
                 {preview.slice(0, 50).map((r, i) => (
                   <tr
                     key={i}
-                    className="border-t border-slate-100 hover:bg-slate-50/50"
+                    className="hover:bg-slate-800/40 transition-colors"
                   >
-                    <td className="px-4 py-2.5 font-medium text-slate-900 max-w-[220px] truncate">
+                    <td className="px-5 py-3 font-medium text-white max-w-[220px] truncate">
                       {r.judul}
                     </td>
-                    <td className="px-4 py-2.5 text-slate-600 max-w-[160px] truncate">
+                    <td className="px-5 py-3 text-slate-300 max-w-[160px] truncate">
                       {r.penulis}
                     </td>
-                    <td className="px-4 py-2.5 text-slate-600">{r.kategori}</td>
-                    <td className="px-4 py-2.5">
+                    <td className="px-5 py-3 text-slate-300">{r.kategori}</td>
+                    <td className="px-5 py-3">
                       {r.klasifikasi ? (
-                        <span className="font-mono font-semibold text-emerald-700">
+                        <span className="font-mono font-bold text-emerald-400">
                           {r.klasifikasi}
                         </span>
                       ) : (
-                        <span className="text-amber-600 text-[10px] italic">
-                          kosong
+                        <span className="text-amber-400 text-[10px] italic">
+                          auto
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-2.5 text-center font-mono font-semibold text-slate-900">
+                    <td className="px-5 py-3 text-center font-mono font-bold text-emerald-300">
                       {r.jumlah}
                     </td>
-                    <td className="px-4 py-2.5 font-mono text-slate-500 text-[10px]">
+                    <td className="px-5 py-3 font-mono text-slate-400 text-[11px]">
                       {r.isbn || "-"}
                     </td>
-                    <td className="px-4 py-2.5 text-slate-500">
+                    <td className="px-5 py-3 text-slate-400">
                       {r.tahun_ajaran || "-"}
                     </td>
                   </tr>
@@ -283,17 +282,17 @@ export function ImportBukuClient() {
               </tbody>
             </table>
             {preview.length > 50 && (
-              <p className="text-[11px] text-slate-400 px-4 py-2 bg-slate-50">
+              <p className="text-xs text-slate-400 px-5 py-2.5 bg-slate-950/50">
                 Menampilkan 50 dari {preview.length} baris...
               </p>
             )}
           </div>
 
-          <div className="flex items-center gap-3 px-5 py-4 border-t border-slate-100">
+          <div className="flex items-center gap-3 px-6 py-4 border-t border-slate-800">
             <button
               onClick={handleImport}
               disabled={busy === "import"}
-              className="h-10 px-5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-2 transition-colors"
+              className="h-11 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm disabled:opacity-50 flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-emerald-500/20"
             >
               {busy === "import" ? (
                 <>
@@ -309,7 +308,7 @@ export function ImportBukuClient() {
             <button
               onClick={reset}
               disabled={busy === "import"}
-              className="h-10 px-5 rounded-lg border border-slate-300 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors"
+              className="h-11 px-5 rounded-xl border border-slate-700 hover:border-slate-600 text-slate-300 hover:text-white text-sm font-semibold bg-slate-800/80 hover:bg-slate-700/80 transition-all cursor-pointer"
             >
               Batal
             </button>

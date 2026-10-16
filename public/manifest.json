@@ -1,0 +1,24 @@
+{
+  "name": "Perpustakaan SMKN 1 Beringin",
+  "short_name": "Perpus Beringin",
+  "description": "Aplikasi Resmi Perpustakaan Digital & E-Book SMK Negeri 1 Beringin",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#059669",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

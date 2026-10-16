@@ -4,8 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { DURASI_PINJAM_HARI, DENDA_PER_HARI } from "@/lib/constants";
 import { hitungDenda } from "@/lib/utils";
+import { requireAdminSession } from "@/lib/security";
 
 export async function createTransaksi(formData: FormData) {
+  await requireAdminSession();
   const siswaId = formData.get("siswaId") as string;
   const gaya = formData.get("gaya") as string;
   const bukuIds = formData.getAll("bukuIds") as string[];
@@ -97,6 +99,7 @@ export async function createTransaksi(formData: FormData) {
 }
 
 export async function updateTransaksi(id: string, formData: FormData) {
+  await requireAdminSession();
   const batasKembaliRaw = formData.get("batasKembali") as string;
   const tambahanHariRaw = formData.get("tambahanHari") as string;
 
@@ -133,6 +136,7 @@ export async function updateTransaksi(id: string, formData: FormData) {
 }
 
 export async function perpanjangTransaksi(id: string, tambahanHari: number) {
+  await requireAdminSession();
   const transaksi = await prisma.transaksi.findUnique({ where: { id } });
   if (!transaksi || transaksi.status !== "DIPINJAM") {
     throw new Error("Hanya transaksi aktif yang dapat diperpanjang");
@@ -155,6 +159,7 @@ export async function perpanjangTransaksi(id: string, tambahanHari: number) {
 }
 
 export async function selesaikanTransaksi(id: string) {
+  await requireAdminSession();
   const transaksi = await prisma.transaksi.findUnique({ where: { id } });
   if (!transaksi) {
     throw new Error("Transaksi tidak ditemukan");
@@ -196,6 +201,7 @@ export async function selesaikanTransaksi(id: string) {
 }
 
 export async function deleteTransaksi(id: string) {
+  await requireAdminSession();
   const transaksi = await prisma.transaksi.findUnique({ where: { id } });
 
   if (!transaksi) {
@@ -227,4 +233,101 @@ export async function deleteTransaksi(id: string) {
   revalidatePath("/admin/transaksi");
   revalidatePath("/admin/laporan");
   revalidatePath("/admin");
+}
+
+export async function lookupBarcodeTransaksiAction(rawCode: string) {
+  await requireAdminSession();
+  const clean = rawCode.trim().replace(/[-\s]/g, "");
+  if (!clean) return { ok: false as const, message: "Kode barcode kosong" };
+
+  // 1. Cek apakah ini barcode siswa (NISN / ID)
+  const siswa = await prisma.siswa.findFirst({
+    where: {
+      OR: [
+        { nisn: clean },
+        { nisn: rawCode.trim() },
+        { id: clean },
+        { id: rawCode.trim() },
+      ],
+    },
+    select: { id: true, nama: true, nisn: true, kelas: true },
+  });
+
+  if (siswa) {
+    return {
+      ok: true as const,
+      type: "SISWA" as const,
+      siswa,
+      message: `Siswa "${siswa.nama}" (${siswa.kelas}) terpilih.`,
+    };
+  }
+
+  // 2. Cek apakah ini barcode eksemplar buku
+  const eksemplar = await prisma.eksemplar.findFirst({
+    where: {
+      OR: [
+        { kode: clean },
+        { kode: rawCode.trim() },
+      ],
+    },
+    include: { buku: true },
+  });
+
+  if (eksemplar && eksemplar.buku) {
+    return {
+      ok: true as const,
+      type: "BUKU" as const,
+      buku: {
+        id: eksemplar.buku.id,
+        judul: eksemplar.buku.judul,
+        penulis: eksemplar.buku.penulis,
+        stok_tersedia: eksemplar.buku.stok_tersedia,
+        tipe_buku: eksemplar.buku.tipe_buku,
+        kode_buku: eksemplar.buku.kode_buku,
+      },
+      eksemplarKode: eksemplar.kode,
+      message: `Buku "${eksemplar.buku.judul}" (#${eksemplar.kode}) ditambahkan.`,
+    };
+  }
+
+  // 3. Cek apakah ini ISBN / kode_buku (toleran terhadap tanda strip dan spasi)
+  const bukuRows = await prisma.$queryRaw<Array<{
+    id: string;
+    judul: string;
+    penulis: string;
+    stok_tersedia: number;
+    tipe_buku: any;
+    kode_buku: string | null;
+  }>>`
+    SELECT id, judul, penulis, stok_tersedia, tipe_buku, kode_buku
+    FROM "Buku"
+    WHERE REPLACE(REPLACE(COALESCE(kode_buku, ''), '-', ''), ' ', '') = ${clean}
+       OR kode_buku = ${clean}
+       OR kode_buku = ${rawCode.trim()}
+       OR id = ${clean}
+       OR id = ${rawCode.trim()}
+    LIMIT 1
+  `;
+  const buku = bukuRows[0] || null;
+
+  if (buku) {
+    return {
+      ok: true as const,
+      type: "BUKU" as const,
+      buku: {
+        id: buku.id,
+        judul: buku.judul,
+        penulis: buku.penulis,
+        stok_tersedia: buku.stok_tersedia,
+        tipe_buku: buku.tipe_buku,
+        kode_buku: buku.kode_buku,
+      },
+      message: `Buku "${buku.judul}" ditambahkan ke peminjaman.`,
+    };
+  }
+
+  return {
+    ok: false as const,
+    message: `Kode barcode "${rawCode}" tidak ditemukan di data siswa maupun katalog buku.`,
+  };
 }

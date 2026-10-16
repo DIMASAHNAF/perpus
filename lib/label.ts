@@ -63,14 +63,54 @@ export function printWithPageSize(widthMm: number, heightMm: number) {
     document.head.appendChild(style);
   }
 
-  style.textContent = `@page { size: ${widthMm}mm ${heightMm}mm; margin: 0; }`;
+  style.textContent = `
+    @page { 
+      size: ${widthMm}mm ${heightMm}mm; 
+      margin: 0 !important; 
+    }
+    @media print {
+      *, *::before, *::after {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      html, body {
+        width: ${widthMm}mm !important;
+        height: ${heightMm}mm !important;
+        max-width: ${widthMm}mm !important;
+        max-height: ${heightMm}mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        background: #ffffff !important;
+      }
+      nav, header, footer, aside, .print-hidden, .print\\:hidden {
+        display: none !important;
+      }
+      .print-area {
+        display: block !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: ${widthMm}mm !important;
+        height: ${heightMm}mm !important;
+        max-width: ${widthMm}mm !important;
+        max-height: ${heightMm}mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+      }
+    }
+  `;
 
   // Restore setelah print dialog
   const restore = () => {
-    style.textContent = "@page { size: auto; margin: 0; }";
+    style.textContent = "";
     window.removeEventListener("afterprint", restore);
   };
   window.addEventListener("afterprint", restore);
 
-  window.print();
+  setTimeout(() => {
+    window.print();
+  }, 60);
 }
+

@@ -9,12 +9,14 @@ import {
   MAX_JUDUL_PINJAM,
 } from "@/lib/constants";
 import { hitungDenda } from "@/lib/utils";
+import { requireAdminSession } from "@/lib/security";
 
 /**
  * Generate N eksemplar untuk 1 buku. Kode 8-digit sequential, rak auto-assign
  * dari klasifikasi DDC buku. Sinkron stok_total/stok_tersedia.
  */
 export async function generateEksemplar(bukuId: string, jumlah: number) {
+  await requireAdminSession();
   if (!bukuId || jumlah < 1 || jumlah > 500) {
     throw new Error("Jumlah eksemplar tidak valid (1-500)");
   }
@@ -72,6 +74,7 @@ export async function updateStatusEksemplar(
   id: string,
   status: "TERSEDIA" | "DIPINJAM" | "RUSAK" | "HILANG"
 ) {
+  await requireAdminSession();
   const eks = await prisma.eksemplar.findUnique({
     where: { id },
     include: { buku: true },
@@ -122,6 +125,7 @@ export type ScanResult = {
  * Cari anggota dari scan kartu (no_anggota A0001 atau NISN 10 digit).
  */
 export async function scanAnggota(kode: string) {
+  await requireAdminSession();
   const value = kode.trim();
   if (!value) {
     return { ok: false, pesan: "Kode kartu kosong" } as ScanResult;
@@ -182,6 +186,7 @@ export async function scanEksemplar(
   anggotaId: string,
   kode: string
 ): Promise<ScanResult> {
+  await requireAdminSession();
   const value = kode.trim();
   if (!anggotaId || !value) {
     return { ok: false, pesan: "Data scan tidak lengkap" };
@@ -367,6 +372,7 @@ export async function scanEksemplar(
  * Perpanjang masa pinjam (maksimal 1x periode).
  */
 export async function perpanjangPinjaman(transaksiId: string): Promise<ScanResult> {
+  await requireAdminSession();
   if (!transaksiId) return { ok: false, pesan: "ID transaksi kosong" };
 
   const t = await prisma.transaksi.findUnique({

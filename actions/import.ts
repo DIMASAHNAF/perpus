@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireAdminSession } from "@/lib/security";
 
 /**
  * Parse CSV sederhana (RFC4180-lite): kutip ganda, koma di dalam kutip,
@@ -108,6 +109,7 @@ export type ImportResult = {
  * Validasi CSV + ambil preview (juga fetch DDC dari ISBN bila klasifikasi kosong).
  */
 export async function previewImportBuku(csvText: string): Promise<ImportResult> {
+  await requireAdminSession();
   const rows = parseCsv(csvText);
   if (rows.length === 0) {
     return { ok: false, pesan: "CSV kosong atau tidak terbaca" };
@@ -244,6 +246,7 @@ function ddcDariKategori(kat: string): string {
  * lalu generate eksemplar 8-digit + assign rak dari DDC.
  */
 export async function importBuku(rows: ImportRow[]): Promise<ImportResult> {
+  await requireAdminSession();
   if (!rows.length) return { ok: false, pesan: "Tidak ada data" };
 
   const errors: string[] = [];

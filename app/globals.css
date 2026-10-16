@@ -1,8 +1,37 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
+
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+}
+
+.dark, [data-theme="dark"] {
+  --background: #020617;
+  --foreground: #f8fafc;
+  --card-bg: #0b1329;
+  --card-border: #1e293b;
+}
+
+html.dark body {
+  background-color: #020617;
+  background-image: 
+    radial-gradient(1100px 620px at 88% -8%, rgba(2, 132, 199, 0.15), transparent 62%),
+    radial-gradient(900px 560px at 4% 4%, rgba(37, 99, 235, 0.12), transparent 60%),
+    linear-gradient(180deg, #020617 0%, #07132c 100%);
+  color: #f8fafc;
+}
+
+html.light body {
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(1100px 620px at 88% -8%, rgba(2, 132, 199, 0.06), transparent 62%),
+    radial-gradient(900px 560px at 4% 4%, rgba(59, 130, 246, 0.05), transparent 60%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  color: #0f172a;
 }
 
 @theme inline {
@@ -10,53 +39,528 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* breakpoint xs untuk layar kecil (antara default & sm) */
+  --breakpoint-xs: 480px;
+
+  /* Blue Theme System (Oceanic Sapphire, Soft Blue & Clean Slate) */
+  --color-emerald-50: #f0f7ff;
+  --color-emerald-100: #e0effe;
+  --color-emerald-200: #bae0fd;
+  --color-emerald-300: #7cc5fa;
+  --color-emerald-400: #38b0f8;
+  --color-emerald-500: #0284c7;
+  --color-emerald-600: #0369a1;
+  --color-emerald-700: #075985;
+  --color-emerald-800: #0c4a6e;
+  --color-emerald-900: #083344;
+  --color-emerald-950: #041f2d;
 }
 
 body {
   background-color: #f8fafc;
+  background-image:
+    radial-gradient(1100px 620px at 88% -8%, rgba(2, 132, 199, 0.06), transparent 62%),
+    radial-gradient(900px 560px at 4% 4%, rgba(59, 130, 246, 0.05), transparent 60%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
   color: #0f172a;
   font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   min-height: 100vh;
 }
 
+/* ponytail: dekorasi animasi halaman publik. Upgrade path: hapus blok ini. */
+@keyframes perpus-blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(52px, -58px) scale(1.22); }
+  66%      { transform: translate(-44px, 42px) scale(0.86); }
+}
+@keyframes perpus-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-20px); }
+}
+@keyframes perpus-fade-up {
+  from { opacity: 0; transform: translateY(26px) scale(.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes perpus-shimmer {
+  0%   { background-position: -120% 0; }
+  100% { background-position: 220% 0; }
+}
+@keyframes perpus-pop {
+  0%   { opacity: 0; transform: scale(.9) translateY(16px); }
+  60%  { opacity: 1; transform: scale(1.02) translateY(-2px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes aurora-mesh-1 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33%      { transform: translate(60px, -45px) scale(1.18) rotate(12deg); }
+  66%      { transform: translate(-35px, 40px) scale(0.92) rotate(-8deg); }
+}
+@keyframes aurora-mesh-2 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33%      { transform: translate(-50px, 45px) scale(1.15) rotate(-14deg); }
+  66%      { transform: translate(45px, -30px) scale(0.88) rotate(16deg); }
+}
+@keyframes aurora-mesh-3 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50%      { transform: translate(40px, 35px) scale(1.2) rotate(-20deg); }
+}
+@keyframes aurora-wave-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50%      { opacity: 0.65; transform: scale(1.1); }
+}
+
+.animate-blob          { animation: perpus-blob 8s ease-in-out infinite; }
+.animate-float         { animation: perpus-float 3.5s ease-in-out infinite; }
+.animate-fade-up       { animation: perpus-fade-up .5s cubic-bezier(.22, 1, .36, 1) both; }
+.animate-pop           { animation: perpus-pop .3s cubic-bezier(.22, 1, .36, 1) both; }
+.animate-aurora-1      { animation: aurora-flow-1 14s ease-in-out infinite; }
+.animate-aurora-2      { animation: aurora-flow-2 18s ease-in-out -5s infinite; }
+.animate-aurora-3      { animation: aurora-flow-3 16s ease-in-out -10s infinite; }
+.animate-aurora-mesh-1 { animation: aurora-mesh-1 18s ease-in-out infinite; }
+.animate-aurora-mesh-2 { animation: aurora-mesh-2 22s ease-in-out -7s infinite; }
+.animate-aurora-mesh-3 { animation: aurora-mesh-3 20s ease-in-out -12s infinite; }
+.animate-aurora-pulse  { animation: aurora-wave-pulse 10s ease-in-out infinite; }
+
+/* ponytail: animasi latar bertema perpustakaan digital. Upgrade path: hapus blok ini. */
+@keyframes perpus-aurora {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1);   opacity: .55; }
+  50%      { transform: translate3d(40px, -30px, 0) scale(1.15); opacity: .9; }
+}
+@keyframes perpus-wave {
+  from { background-position: 0 0; }
+  to   { background-position: 600px 0; }
+}
+@keyframes perpus-bokeh {
+  0%, 100% { transform: translateY(0) scale(1);   opacity: .35; }
+  50%      { transform: translateY(-26px) scale(1.14); opacity: .75; }
+}
+@keyframes perpus-book-float {
+  0%   { transform: translateY(0) rotate(var(--rot, 0deg)); opacity: 0; }
+  12%  { opacity: .9; }
+  88%  { opacity: .9; }
+  100% { transform: translateY(-130px) rotate(calc(var(--rot, 0deg) + 24deg)); opacity: 0; }
+}
+@keyframes perpus-twinkle {
+  0%, 100% { opacity: .15; transform: scale(.7); }
+  50%      { opacity: 1;   transform: scale(1.25); }
+}
+
+/* Aurora biru menyala — blob besar bergerak halus */
+.aurora-layer { position: absolute; inset: -20%; pointer-events: none; }
+.aurora-layer::before,
+.aurora-layer::after {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  mix-blend-mode: screen;
+}
+.aurora-layer::before {
+  width: 46vw; height: 46vw; top: 6%;  left: -6%;
+  background: radial-gradient(circle, rgba(59,130,246,.85), transparent 62%);
+  animation: perpus-aurora 12s ease-in-out infinite;
+}
+.aurora-layer::after {
+  width: 40vw; height: 40vw; bottom: 4%; right: -4%;
+  background: radial-gradient(circle, rgba(34,211,238,.8), transparent 62%);
+  animation: perpus-aurora 15s ease-in-out -6s infinite reverse;
+}
+
+/* Gelombang sutra mengalir — garis lengkung halus, bukan kotak */
+.silk-waves {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Cg fill='none' stroke='%2393c5fd' stroke-width='1.1' opacity='0.5'%3E%3Cpath d='M-40 120 Q 150 40 320 120 T 660 120'/%3E%3Cpath d='M-40 210 Q 160 130 330 210 T 660 210'/%3E%3Cpath d='M-40 300 Q 150 220 320 300 T 660 300'/%3E%3Cpath d='M-40 390 Q 160 310 330 390 T 660 390'/%3E%3Cpath d='M-40 480 Q 150 400 320 480 T 660 480'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 600px 600px;
+  animation: perpus-wave 22s linear infinite;
+}
+
+/* Bokeh — lingkaran cahaya lembut melayang */
+.bokeh {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(2px);
+  background: radial-gradient(circle, rgba(191,219,254,.9) 0%, rgba(147,197,253,.45) 45%, transparent 70%);
+  animation: perpus-bokeh var(--dur, 7s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+/* Ikon buku melayang naik perlahan */
+.book-float {
+  position: absolute;
+  color: rgba(147, 197, 253, .9);
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, .65));
+  animation: perpus-book-float var(--dur, 16s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+/* Bintang berkelap-kelip kecil */
+.twinkle {
+  position: absolute;
+  border-radius: 9999px;
+  background: #bfdbfe;
+  box-shadow: 0 0 8px 2px rgba(147, 197, 253, .85);
+  animation: perpus-twinkle var(--dur, 3s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.text-gradient {
+  background: linear-gradient(90deg, #ffffff 0%, #cfe0ff 45%, #a5f3fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.shimmer-line {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  background-size: 200% 100%;
+  animation: perpus-shimmer 2.4s linear infinite;
+}
+
+.page-subtle {
+  background-image: radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.055) 1px, transparent 0);
+  background-size: 26px 26px;
+}
+
+/* ponytail: pola rak buku kayu untuk latar login/hero. Hapus untuk latar polos. */
+.book-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cg fill='none' stroke='%2392410e' stroke-width='2'%3E%3C!-- baris rak atas --%3E%3Crect x='8' y='26' width='56' height='42' rx='2.5'/%3E%3Crect x='70' y='34' width='26' height='34' rx='2.5'/%3E%3Crect x='102' y='22' width='20' height='46' rx='2.5'/%3E%3Crect x='128' y='36' width='40' height='32' rx='2.5'/%3E%3C!-- baris rak bawah --%3E%3Crect x='14' y='104' width='34' height='48' rx='2.5'/%3E%3Crect x='54' y='112' width='46' height='40' rx='2.5'/%3E%3Crect x='106' y='98' width='24' height='54' rx='2.5'/%3E%3Crect x='136' y='110' width='32' height='42' rx='2.5'/%3E%3C!-- papan kayu horizontal --%3E%3Cpath d='M4 74h172M4 158h172'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  opacity: 0.13;
+}
+
+/* ponytail: tekstur kertas halus berlapis di atas gradien body. Hapus untuk latar bersih. */
+.paper-texture {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
+  opacity: 0.035;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-blob, .animate-float, .animate-fade-up, .animate-pop,
+  .aurora-layer::before, .aurora-layer::after, .silk-waves, .bokeh,
+  .book-float, .twinkle, .shimmer-line { animation: none !important; }
+}
+
+/* ============================================
+   MOBILE RESPONSIVE UTILITIES
+   ============================================ */
+
+/* Pastikan semua tabel bisa di-scroll horizontal di mobile */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 0.75rem;
+}
+
+/* Mobile card view untuk tabel — sembunyikan kolom di mobile, tampilkan card */
+@media (max-width: 639px) {
+  .mobile-card-table thead { display: none; }
+  .mobile-card-table tr {
+    display: block;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .mobile-card-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+    border: none;
+    font-size: 0.75rem;
+  }
+  .mobile-card-table td[data-label]::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 80px;
+  }
+}
+
+/* Bottom safe area padding untuk iOS */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0.5rem);
+}
+
+/* Touch-friendly minimum tap target */
+.tap-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile sticky bottom bar */
+.mobile-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid #e2e8f0;
+  padding: 0.5rem 1rem;
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0));
+  z-index: 40;
+}
+
+/* Scroll snap untuk filter pills di mobile */
+.filter-scroll {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.filter-scroll::-webkit-scrollbar { display: none; }
+.filter-scroll > * { scroll-snap-align: start; flex-shrink: 0; }
+
+/* Utility untuk menyembunyikan scrollbar di mobile tanpa merusak scroll */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Compact stats grid untuk mobile */
+@media (max-width: 400px) {
+  .stats-compact .stat-number { font-size: 1.5rem; }
+  .stats-compact .stat-label { font-size: 0.6rem; }
+}
+
 /* Hide .print-area on screen, show only in print */
-.print-area {display:none;}
+.print-area { display: none; }
 
 /*
- * Ukuran kertas ditentukan oleh <style id="print-page-size"> yang disuntikkan
- * printWithPageSize() tepat sebelum window.print(). Aturan @page harus ada di
- * top-level CSS (tidak boleh nested di dalam selector), jadi global rules ini
- * hanya menangani visibilitas + warna.
+ * Print rules untuk cetak label & kartu anggota
  */
 @media print {
   @page {
-    size: auto;
     margin: 0;
   }
 
-  html, body {
-    background: #fff !important;
-    /* header gradient + barcode canvas harus tercetak apa adanya */
+  *, *::before, *::after {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  .print-hidden {
+  html, body {
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Sembunyikan semua elemen navigasi, panel, dan form */
+  nav, header, footer, aside, .print-hidden, .print\:hidden {
     display: none !important;
   }
 
   .print-area {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    margin: 0;
-    padding: 0;
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
   }
 
-  .print-area canvas {
+  .print-area canvas,
+  .print-area img {
     max-width: 100% !important;
-    height: auto !important;
   }
 }
 
+/* ==========================================================================
+   Universal Theme Consistency & Refined Bridge
+   Ensures seamless transitions, crisp text rendering, and consistent colors
+   ========================================================================== */
+html {
+  color-scheme: light dark;
+}
+
+@media (min-width: 768px) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Optimasi Performa Layar HP (Mobile Rendering) */
+@media (max-width: 767px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Mengurangi beban kompositor GPU pada HP */
+  .filter-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+html:not(.dark),
+html.light,
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+html.dark,
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* Modern Webkit Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.6);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+/* ==========================================================================
+   Interactive Kiosk & Scanner Visual Effects
+   ========================================================================== */
+@keyframes perpus-laser {
+  0% {
+    top: 5%;
+    opacity: 0.2;
+  }
+  50% {
+    top: 92%;
+    opacity: 1;
+  }
+  100% {
+    top: 5%;
+    opacity: 0.2;
+  }
+}
+
+@keyframes perpus-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(2, 132, 199, 0.35), 0 0 30px rgba(56, 176, 248, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(2, 132, 199, 0.65), 0 0 50px rgba(56, 176, 248, 0.35);
+  }
+}
+
+@keyframes perpus-radar-sweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-laser {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: linear-gradient(90deg, transparent 0%, #38bdf8 30%, #ffffff 50%, #38bdf8 70%, transparent 100%);
+  box-shadow: 0 0 16px 3px rgba(56, 189, 248, 0.9), 0 0 8px 1px #ffffff;
+  animation: perpus-laser 2.4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.animate-pulse-glow {
+  animation: perpus-pulse-glow 2.5s ease-in-out infinite;
+}
+
+.animate-radar {
+  animation: perpus-radar-sweep 4s linear infinite;
+}
+
+/* Glassmorphism Card Utilities */
+.glass-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+}
+
+.dark .glass-card {
+  background: rgba(11, 19, 41, 0.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(30, 41, 59, 0.8);
+}
+
+/* Focus Ring Utility */
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  outline: 2px solid #0284c7;
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Responsive Dynamic Viewport (dvh & safe-area) Adaptive Floating Controls
+   Menyesuaikan secara proporsional di semua resolusi, rasio, dan rotasi HP
+   ========================================================================== */
+.floating-adaptive-right {
+  position: fixed;
+  bottom: calc(clamp(0.875rem, 2.8dvh, 2.25rem) + env(safe-area-inset-bottom, 0px));
+  right: calc(clamp(0.75rem, 2.5vw, 1.5rem) + env(safe-area-inset-right, 0px));
+}
+
+.floating-adaptive-left {
+  position: fixed;
+  bottom: calc(clamp(0.875rem, 2.8dvh, 2.25rem) + env(safe-area-inset-bottom, 0px));
+  left: calc(clamp(0.75rem, 2.5vw, 1.5rem) + env(safe-area-inset-left, 0px));
+}
+
+.floating-banner-adaptive {
+  position: fixed;
+  bottom: calc(clamp(4.25rem, 8.5dvh, 5.75rem) + env(safe-area-inset-bottom, 0px));
+  left: calc(clamp(0.75rem, 2.5vw, 1.5rem) + env(safe-area-inset-left, 0px));
+}
+@media (min-width: 640px) {
+  .floating-banner-adaptive {
+    left: auto;
+    right: calc(clamp(0.75rem, 2.5vw, 1.5rem) + env(safe-area-inset-right, 0px));
+  }
+}
+
+.footer-adaptive-padding {
+  padding-bottom: calc(clamp(5.25rem, 9.5dvh, 7.5rem) + env(safe-area-inset-bottom, 0px));
+}

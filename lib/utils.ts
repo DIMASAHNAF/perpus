@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { DENDA_PER_HARI } from "@/lib/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -13,13 +14,20 @@ export function formatRupiah(amount: number): string {
   }).format(amount);
 }
 
-export function formatDate(date: Date | string): string {
-  return new Intl.DateTimeFormat("id-ID", {
-    dateStyle: "medium",
-  }).format(new Date(date));
+export function formatDate(date?: Date | string | null): string {
+  if (!date) return "-";
+  try {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "-";
+    return new Intl.DateTimeFormat("id-ID", {
+      dateStyle: "medium",
+    }).format(d);
+  } catch {
+    return "-";
+  }
 }
 
-export function hitungDenda(batasKembali: Date, tglDikembalikan: Date, dendaPerHari: number): number {
+export function hitungDenda(batasKembali: Date, tglDikembalikan: Date, dendaPerHari: number = DENDA_PER_HARI): number {
   const diff = tglDikembalikan.getTime() - batasKembali.getTime();
   const hariTerlambat = Math.ceil(diff / (1000 * 60 * 60 * 24));
   return hariTerlambat > 0 ? hariTerlambat * dendaPerHari : 0;

@@ -3,19 +3,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { 
-  BookOpen, 
-  Users, 
-  ArrowLeftRight, 
-  LogOut, 
-  AlertTriangle, 
-  ExternalLink,
-  Clock,
-  BookCheck,
-  ChevronRight,
-  ShieldCheck,
-  ScanLine
-} from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import ThemeToggle from "@/components/theme/ThemeToggle";
+import { AdminProfileDropdown } from "@/components/admin/AdminProfileDropdown";
+import { AdminDashboardMenuClient } from "@/components/admin/AdminDashboardMenuClient";
+import { AdminAnalyticsDashboard } from "@/components/admin/AdminAnalyticsDashboard";
+import { getDashboardAnalytics } from "@/lib/analytics";
 
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions);
@@ -25,12 +18,16 @@ export default async function AdminDashboard() {
 
   // Stats
   const totalBuku = await prisma.buku.count();
-  const totalSiswa = await prisma.siswa.count();
-  const totalAnggota = await prisma.anggota.count();
   const totalEksemplar = await prisma.eksemplar.count();
   const bukuDipinjam = await prisma.transaksi.count({
     where: { status: "DIPINJAM" },
   });
+
+  const [totalAnggota, totalAnggotaSiswa, totalAnggotaGuruStaf] = await Promise.all([
+    prisma.anggota.count(),
+    prisma.anggota.count({ where: { jenis: "SISWA" } }),
+    prisma.anggota.count({ where: { jenis: { in: ["GURU", "STAF"] } } }),
+  ]);
 
   // Denda outstanding: transaksi selesai dengan denda belum dibayar
   const dendaAgg = await prisma.transaksi.aggregate({
@@ -38,281 +35,134 @@ export default async function AdminDashboard() {
     _sum: { denda: true },
   });
   const totalDenda = dendaAgg._sum.denda ?? 0;
+
+  // Real-time Analytics & Infografis
+  const analyticsData = await getDashboardAnalytics();
   
-  const siswaTerlambat = await prisma.transaksi.findMany({
-    where: {
-      status: "DIPINJAM",
-      batas_kembali: { lt: new Date() },
-    },
-    include: {
-      siswa: true,
-      buku: true,
-    },
-    take: 5,
-  });
+
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 overflow-hidden font-sans selection:bg-sky-500 selection:text-white transition-colors duration-300">
+      {/* Aurora glow background */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10" aria-hidden="true">
+        <div className="absolute -top-32 -left-20 w-[42rem] h-[42rem] rounded-full bg-sky-400/20 dark:bg-sky-600/15 blur-[130px] animate-aurora-1" />
+        <div className="absolute top-1/3 -right-24 w-[40rem] h-[40rem] rounded-full bg-blue-300/25 dark:bg-blue-600/15 blur-[140px] animate-aurora-2" />
+        <div className="absolute -bottom-32 left-1/3 w-[44rem] h-[44rem] rounded-full bg-cyan-300/20 dark:bg-indigo-600/12 blur-[140px] animate-aurora-3" />
+      </div>
+
       {/* Top Navbar */}
-      <nav className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-3">
-              <img
-                src="/assets/logo.png"
-                alt="Logo SMK Negeri 1 Beringin"
-                className="w-10 h-10 rounded-lg object-contain bg-white border border-slate-200 p-0.5"
-              />
-              <div>
-                <h1 className="text-base font-bold text-slate-900 leading-tight">Admin Perpustakaan</h1>
-                <p className="text-xs text-slate-500">Sistem Manajemen Buku & Peminjaman</p>
+      <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-stone-200/80 dark:border-slate-800 sticky top-0 z-20 shadow-xs">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16 gap-2 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <img
+                  src="/assets/logo.png"
+                  alt="Logo SMK Negeri 1 Beringin"
+                  className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl object-contain bg-white/60 dark:bg-white/10 border border-stone-200 dark:border-white/20 p-1 shrink-0"
+                />
+                <img
+                  src="/assets/logo-kolaborasi.png"
+                  alt="Logo Kolaborasi Sumut Berkah"
+                  className="h-6 sm:h-8 w-auto object-contain shrink-0 hidden xs:block"
+                />
+              </div>
+              <div className="min-w-0 border-l border-stone-200 dark:border-slate-800 pl-2 sm:pl-3">
+                <h1 className="text-xs sm:text-base font-bold text-stone-900 dark:text-white leading-tight truncate flex items-center gap-1.5 sm:gap-2">
+                  <span>Admin Perpustakaan</span>
+                  <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0">
+                    Command Center
+                  </span>
+                </h1>
+                <p className="text-[10px] sm:text-xs text-stone-500 dark:text-slate-400 hidden sm:block truncate">Sistem Manajemen Buku &amp; Peminjaman</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+              <ThemeToggle />
               <Link 
                 href="/" 
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-emerald-700 bg-slate-100 hover:bg-emerald-50 px-3 py-2 rounded-lg transition-colors"
+                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-stone-700 hover:text-stone-900 dark:text-slate-300 dark:hover:text-white bg-stone-100 hover:bg-stone-200/80 dark:bg-slate-800/80 dark:hover:bg-slate-700 border border-stone-300/80 dark:border-slate-700/80 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl transition-all shadow-xs shrink-0"
               >
-                <ExternalLink className="w-3.5 h-3.5" />
-                Lihat Katalog Publik
+                <ExternalLink className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>Katalog Publik</span>
               </Link>
-              <div className="flex items-center gap-2 pl-3 border-l border-slate-200">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-xs">
-                  {session.user?.name?.charAt(0) || "A"}
-                </div>
-                <div className="hidden sm:block text-left">
-                  <div className="text-xs font-semibold text-slate-900">{session.user?.name}</div>
-                  <div className="text-[10px] text-emerald-600 flex items-center gap-1">
-                    <ShieldCheck className="w-3 h-3" /> Pustakawan
-                  </div>
-                </div>
+              <Link
+                href="/"
+                className="sm:hidden inline-flex items-center justify-center w-8.5 h-8.5 text-stone-700 hover:text-stone-900 dark:text-slate-300 dark:hover:text-white bg-stone-100 dark:bg-slate-800 border border-stone-300/80 dark:border-slate-700/80 rounded-xl transition-colors shrink-0"
+                title="Katalog Publik"
+              >
+                <ExternalLink className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              </Link>
+              
+              <div className="pl-1 sm:pl-2 border-l border-stone-200 dark:border-slate-800 shrink-0">
+                <AdminProfileDropdown userName={session.user?.name || "Administrator"} />
               </div>
             </div>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 animate-fade-up stats-compact">
+          <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md p-3.5 sm:p-5 rounded-2xl border border-stone-200/90 dark:border-slate-800 hover:border-stone-300 dark:hover:border-slate-700 transition-all shadow-sm">
+            <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-slate-400 mb-1 stat-label">
               Total Koleksi
             </p>
-            <p className="text-3xl font-extrabold text-slate-900">{totalBuku}</p>
-            <p className="text-[11px] text-slate-500 mt-1">Judul terdaftar</p>
+            <p className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-white stat-number">{totalBuku}</p>
+            <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-slate-400 mt-1">Judul terdaftar</p>
           </div>
 
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1">
+          <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md p-3.5 sm:p-5 rounded-2xl border border-stone-200/90 dark:border-slate-800 hover:border-stone-300 dark:hover:border-slate-700 transition-all shadow-sm">
+            <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-slate-400 mb-1 stat-label">
               Total Eksemplar
             </p>
-            <p className="text-3xl font-extrabold text-teal-700">
+            <p className="text-2xl sm:text-3xl font-extrabold text-teal-600 dark:text-teal-400 stat-number">
               {totalEksemplar}
             </p>
-            <p className="text-[11px] text-slate-500 mt-1">Copy fisik</p>
+            <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-slate-400 mt-1">Copy fisik</p>
           </div>
 
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1">
+          <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md p-3.5 sm:p-5 rounded-2xl border border-stone-200/90 dark:border-slate-800 hover:border-stone-300 dark:hover:border-slate-700 transition-all shadow-sm">
+            <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-slate-400 mb-1 stat-label">
               Sedang Dipinjam
             </p>
-            <p className="text-3xl font-extrabold text-sky-700">{bukuDipinjam}</p>
-            <p className="text-[11px] text-sky-600 mt-1">Buku aktif</p>
+            <p className="text-2xl sm:text-3xl font-extrabold text-sky-600 dark:text-sky-400 stat-number">{bukuDipinjam}</p>
+            <p className="text-[10px] sm:text-[11px] text-sky-600/90 dark:text-sky-400/80 mt-1">Buku aktif</p>
           </div>
 
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1">
+          <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md p-3.5 sm:p-5 rounded-2xl border border-stone-200/90 dark:border-slate-800 hover:border-stone-300 dark:hover:border-slate-700 transition-all shadow-sm">
+            <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-slate-400 mb-1 stat-label">
               Total Anggota
             </p>
-            <p className="text-3xl font-extrabold text-emerald-800">
+            <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 stat-number">
               {totalAnggota}
             </p>
-            <p className="text-[11px] text-slate-500 mt-1">
-              Siswa: {totalSiswa} terdaftar
+            <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-slate-400 mt-1 truncate">
+              Siswa: {totalAnggotaSiswa} • Guru/Staf: {totalAnggotaGuruStaf}
             </p>
           </div>
 
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1">
+          <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md p-3.5 sm:p-5 rounded-2xl border border-stone-200/90 dark:border-slate-800 hover:border-stone-300 dark:hover:border-slate-700 transition-all shadow-sm col-span-2 sm:col-span-1">
+            <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-slate-400 mb-1 stat-label">
               Denda Belum Bayar
             </p>
-            <p className="text-3xl font-extrabold text-rose-700">
-              {totalDenda.toLocaleString("id-ID")}
+            <p className="text-2xl sm:text-3xl font-extrabold text-rose-600 dark:text-rose-400 stat-number flex items-baseline">
+              <span className="text-base sm:text-lg font-bold opacity-80 mr-1">Rp</span>
+              <span>{totalDenda.toLocaleString("id-ID")}</span>
             </p>
-            <p className="text-[11px] text-slate-500 mt-1">Rupiah outstanding</p>
+            <p className="text-[10px] sm:text-[11px] text-rose-600/80 dark:text-rose-400/80 font-medium mt-1">Total tertunggak</p>
           </div>
         </div>
 
-        {/* Scanner CTA - paling mencolok */}
-        <Link
-          href="/admin/sirkulasi"
-          className="group block relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 shadow-xl shadow-emerald-200/50 transition-all hover:shadow-2xl hover:shadow-emerald-300/50 hover:-translate-y-0.5"
-        >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent_50%)]" />
-          <div className="relative px-8 py-7 flex flex-col sm:flex-row items-center justify-between gap-5">
-            <div className="flex items-center gap-5">
-              <div className="w-16 h-16 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center group-hover:bg-white/25 transition-colors">
-                <ScanLine className="w-9 h-9 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-extrabold text-white tracking-tight">
-                  Mulai Scan Sirkulasi
-                </h2>
-                <p className="text-emerald-50 text-sm mt-1 max-w-lg">
-                  Scan kartu anggota → scan buku → pinjam/kembali otomatis dengan
-                  hitung denda. Tempat kerja utama pustakawan.
-                </p>
-              </div>
-            </div>
-            <div className="shrink-0 flex items-center gap-2 bg-white text-emerald-700 font-bold px-6 py-3 rounded-xl shadow-md group-hover:gap-3 transition-all">
-              Buka Scanner
-              <ChevronRight className="w-5 h-5" />
-            </div>
-          </div>
-        </Link>
+        {/* Categorized Menu Dashboard */}
+        <AdminDashboardMenuClient />
 
-        {/* Quick Menu */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h2 className="text-base font-bold text-slate-900">Menu Manajemen Utama</h2>
-              <p className="text-xs text-slate-500">Pilih menu navigasi untuk mengelola data perpustakaan</p>
-            </div>
-          </div>
+        {/* Visual Infografis & Interactive Trends */}
+        <AdminAnalyticsDashboard data={analyticsData} />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Link
-              href="/admin/buku"
-              className="group p-5 rounded-xl border border-slate-200 hover:border-emerald-500 bg-white hover:bg-emerald-50/40 transition-all shadow-xs hover:shadow flex flex-col justify-between"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                  <BookOpen className="w-5 h-5" />
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all" />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-900 text-sm group-hover:text-emerald-700 transition-colors">Kelola Buku</h3>
-                <p className="text-xs text-slate-500 mt-1">Tambah, edit, hapus, dan atur stok ketersediaan buku</p>
-              </div>
-            </Link>
 
-            <Link
-              href="/admin/anggota"
-              className="group p-5 rounded-xl border border-slate-200 hover:border-emerald-500 bg-white hover:bg-emerald-50/40 transition-all shadow-xs hover:shadow flex flex-col justify-between"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                  <Users className="w-5 h-5" />
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all" />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-900 text-sm group-hover:text-emerald-700 transition-colors">Kelola Anggota</h3>
-                <p className="text-xs text-slate-500 mt-1">CRUD siswa/guru/staf, tanggal bergabung, & cetak kartu</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/admin/transaksi"
-              className="group p-5 rounded-xl border border-slate-200 hover:border-sky-500 bg-white hover:bg-sky-50/40 transition-all shadow-xs hover:shadow flex flex-col justify-between"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center group-hover:bg-sky-600 group-hover:text-white transition-colors">
-                  <ArrowLeftRight className="w-5 h-5" />
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-sky-600 group-hover:translate-x-0.5 transition-all" />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-900 text-sm group-hover:text-sky-700 transition-colors">Transaksi Pinjam/Kembali</h3>
-                <p className="text-xs text-slate-500 mt-1">Input peminjaman custom durasi & catat denda pengembalian</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/admin/laporan"
-              className="group p-5 rounded-xl border border-slate-200 hover:border-teal-500 bg-white hover:bg-teal-50/40 transition-all shadow-xs hover:shadow flex flex-col justify-between"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-colors">
-                  <BookCheck className="w-5 h-5" />
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-teal-600 group-hover:translate-x-0.5 transition-all" />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-900 text-sm group-hover:text-teal-700 transition-colors">Laporan & Ekspor Data</h3>
-                <p className="text-xs text-slate-500 mt-1">Rekap sirkulasi, unduh Excel CSV, dan cetak laporan PDF</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/admin/sirkulasi"
-              className="group p-5 rounded-xl border-2 border-emerald-400 bg-emerald-50/50 hover:bg-emerald-100/60 transition-all shadow-sm flex flex-col justify-between"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
-                  <ScanLine className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] font-bold text-emerald-700 bg-white px-2 py-0.5 rounded-full border border-emerald-200">
-                  UTAMA
-                </span>
-              </div>
-              <div>
-                <h3 className="font-bold text-emerald-700 text-sm">Sirkulasi Scanner</h3>
-                <p className="text-xs text-slate-600 mt-1">Scan kartu anggota lalu scan buku — pinjam/kembali otomatis</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/api/auth/signout"
-              className="group p-5 rounded-xl border border-rose-200 hover:border-rose-400 bg-white hover:bg-rose-50/50 transition-all shadow-xs flex flex-col justify-between"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center group-hover:bg-rose-600 group-hover:text-white transition-colors">
-                  <LogOut className="w-5 h-5" />
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-rose-600 group-hover:translate-x-0.5 transition-all" />
-              </div>
-              <div>
-                <h3 className="font-bold text-rose-700 text-sm">Keluar Akun</h3>
-                <p className="text-xs text-slate-500 mt-1">Akhiri sesi login pengelola perpustakaan</p>
-              </div>
-            </Link>
-          </div>
-        </div>
-
-        {/* Siswa Terlambat */}
-        {siswaTerlambat.length > 0 && (
-          <div className="bg-white rounded-xl border border-rose-200 shadow-sm p-6">
-            <div className="flex items-center gap-2.5 mb-4 text-rose-700">
-              <div className="p-2 bg-rose-100 rounded-lg">
-                <AlertTriangle className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-slate-900">Perhatian: Siswa Terlambat Mengembalikan</h2>
-                <p className="text-xs text-slate-500">Daftar buku yang telah melewati batas tanggal jatuh tempo peminjaman</p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {siswaTerlambat.map((t) => (
-                <div key={t.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-rose-50/60 border border-rose-100 rounded-xl gap-2">
-                  <div>
-                    <p className="font-bold text-slate-900 text-sm">{t.siswa?.nama || 'N/A'} <span className="text-xs font-normal text-slate-600">({t.siswa?.kelas || 'N/A'} - NISN: {t.siswa?.nisn || 'N/A'})</span></p>
-                    <p className="text-xs text-slate-700 mt-0.5">Judul Buku: <strong>{t.buku?.judul || 'N/A'}</strong></p>
-                  </div>
-                  <div className="sm:text-right">
-                    <p className="text-xs text-rose-700 font-semibold bg-white px-2.5 py-1 rounded-md border border-rose-200 inline-block">
-                      Jatuh Tempo: {new Date(t.batas_kembali).toLocaleDateString("id-ID")}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -44,3 +44,10 @@ next-env.d.ts
 node_modules/
 dist/
 .env
+
+prisma/dev.db
+
+# Local temporary and root media renders
+/*.mp4
+*.save
+public/video/

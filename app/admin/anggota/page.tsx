@@ -3,21 +3,14 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { deleteAnggota } from "@/actions/anggota";
-import { Button } from "@/components/ui/Button";
-import { formatDate } from "@/lib/utils";
-import {
-  ArrowLeft,
-  Users,
-  UserPlus,
-  Edit3,
-  Trash2,
-  Hash,
-  AlertCircle,
-  CreditCard,
-  CalendarDays,
-  BookCheck,
-} from "lucide-react";
+import { ArrowLeft, Users, UserPlus, CreditCard } from "lucide-react";
+import { AnggotaListClient, type AnggotaListItem } from "@/components/admin/AnggotaListClient";
+import { ImportSiswaModal } from "@/components/admin/ImportSiswaModal";
+import { KelolaKelulusanModal } from "@/components/admin/KelolaKelulusanModal";
+import ThemeToggle from "@/components/theme/ThemeToggle";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function AnggotaPage() {
   const session = await getServerSession(authOptions);
@@ -26,7 +19,11 @@ export default async function AnggotaPage() {
   const anggota = await prisma.anggota.findMany({
     orderBy: { createdAt: "desc" },
     include: {
-      kelasRef: true,
+      kelasRef: {
+        select: {
+          nama_kelas: true,
+        },
+      },
       _count: {
         select: {
           transaksi: { where: { status: "DIPINJAM" } },
@@ -35,232 +32,76 @@ export default async function AnggotaPage() {
     },
   });
 
-  const totalAktif = anggota.filter((a) => a.status_aktif).length;
-  const totalPinjam = anggota.reduce((n, a) => n + a._count.transaksi, 0);
-
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <nav className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-3">
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 overflow-hidden font-sans selection:bg-sky-500 selection:text-white transition-colors duration-300">
+      {/* Aurora glow background */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10" aria-hidden="true">
+        <div className="absolute -top-32 -left-20 w-[42rem] h-[42rem] rounded-full bg-sky-400/20 dark:bg-sky-600/15 blur-[130px] animate-aurora-1" />
+        <div className="absolute top-1/3 -right-24 w-[40rem] h-[40rem] rounded-full bg-blue-300/25 dark:bg-blue-600/15 blur-[140px] animate-aurora-2" />
+        <div className="absolute -bottom-32 left-1/3 w-[44rem] h-[44rem] rounded-full bg-cyan-300/20 dark:bg-indigo-600/12 blur-[140px] animate-aurora-3" />
+      </div>
+
+      {/* Header Sticky Navigation */}
+      <header className="sticky top-0 z-30 backdrop-blur-xl bg-white/80 dark:bg-slate-950/70 border-b border-stone-200/80 dark:border-slate-800/80 mb-6 sm:mb-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-18 gap-2 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <Link
                 href="/admin"
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-emerald-700 bg-slate-100 hover:bg-emerald-50 px-3 py-1.5 rounded-md transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-stone-700 hover:text-emerald-600 dark:text-slate-300 dark:hover:text-emerald-400 bg-stone-100 hover:bg-stone-200/80 dark:bg-slate-900/80 dark:hover:bg-slate-800 border border-stone-300/80 dark:border-slate-800 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl transition-all cursor-pointer shadow-xs shrink-0"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Dashboard
+                <span className="hidden sm:inline">Dashboard</span>
               </Link>
-              <span className="text-slate-300">/</span>
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-emerald-600" />
-                <h1 className="text-lg font-bold text-slate-900">Data Anggota</h1>
+              <span className="text-stone-300 dark:text-slate-700 hidden sm:inline">/</span>
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 hidden xs:flex">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-xs sm:text-base font-black text-stone-900 dark:text-white truncate">
+                      Data Anggota
+                    </h1>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 hidden md:inline-block shrink-0">
+                      Siswa · Guru
+                    </span>
+                  </div>
+                  <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-slate-400 hidden sm:block truncate">
+                    SMK Negeri 1 Beringin · Registrasi &amp; Kartu
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Link href="/admin/anggota/cetak-kartu">
-                <Button size="sm" variant="outline" className="h-8">
-                  <CreditCard className="w-4 h-4" />
-                  Cetak Kartu
-                </Button>
+            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+              <ThemeToggle />
+              <ImportSiswaModal />
+              <KelolaKelulusanModal />
+              <Link
+                href="/admin/anggota/cetak-kartu"
+                className="hidden md:inline-flex items-center gap-1.5 h-9 sm:h-10 px-3.5 rounded-xl bg-stone-100 hover:bg-stone-200/80 dark:bg-slate-900/80 dark:hover:bg-slate-800 text-stone-700 hover:text-stone-900 dark:text-slate-300 dark:hover:text-white border border-stone-300/80 dark:border-slate-800 text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs shrink-0"
+              >
+                <CreditCard className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>Cetak Kartu</span>
               </Link>
-              <Link href="/admin/anggota/create">
-                <Button size="sm">
-                  <UserPlus className="w-4 h-4" />
-                  Tambah Anggota
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        {/* Stat strip */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-5 py-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Total Anggota
-            </p>
-            <p className="text-2xl font-extrabold text-slate-900 mt-1">
-              {anggota.length}
-            </p>
-          </div>
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-5 py-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Aktif
-            </p>
-            <p className="text-2xl font-extrabold text-emerald-700 mt-1">
-              {totalAktif}
-            </p>
-          </div>
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-5 py-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Buku Dipinjam
-            </p>
-            <p className="text-2xl font-extrabold text-sky-700 mt-1">
-              {totalPinjam}
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    Anggota
-                  </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    No. Anggota
-                  </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    Jenis
-                  </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    Bergabung
-                  </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    Aksi
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-slate-200">
-                {anggota.map((a) => (
-                  <tr key={a.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm border shrink-0 ${
-                            a.jenis === "GURU"
-                              ? "bg-indigo-50 text-indigo-700 border-indigo-200"
-                              : a.jenis === "STAF"
-                                ? "bg-amber-50 text-amber-700 border-amber-200"
-                                : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          }`}
-                        >
-                          {a.nama.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="font-semibold text-slate-900">
-                            {a.nama}
-                          </div>
-                          <div className="text-xs text-slate-500 flex items-center gap-1 font-mono">
-                            {a.nisn ? (
-                              <>
-                                <Hash className="w-3 h-3 text-slate-400" />
-                                {a.nisn}
-                              </>
-                            ) : a.telepon ? (
-                              <>{a.telepon}</>
-                            ) : (
-                              <span className="italic">tanpa kontak</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="font-mono font-bold text-emerald-700">
-                        {a.no_anggota}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
-                          a.jenis === "GURU"
-                            ? "bg-indigo-50 text-indigo-700 border-indigo-200"
-                            : a.jenis === "STAF"
-                              ? "bg-amber-50 text-amber-700 border-amber-200"
-                              : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                        }`}
-                      >
-                        {a.jenis}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1.5 text-slate-600">
-                        <CalendarDays className="w-3.5 h-3.5 text-slate-400" />
-                        <div>
-                          <div className="text-xs font-medium">
-                            {formatDate(a.createdAt)}
-                          </div>
-                          <div className="text-[10px] text-slate-400">
-                            {new Date(a.createdAt).toLocaleTimeString("id-ID", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}{" "}
-                            WIB
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      {a._count.transaksi > 0 ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                          <BookCheck className="w-3.5 h-3.5" />
-                          {a._count.transaksi} dipinjam
-                        </span>
-                      ) : a.status_aktif ? (
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          Aktif
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-500 border border-slate-200">
-                          Non-aktif
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="inline-flex items-center justify-end gap-2">
-                        <Link href={`/admin/anggota/${a.id}/edit`}>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 px-2.5 text-xs"
-                          >
-                            <Edit3 className="w-3.5 h-3.5 text-slate-600" />
-                            Edit
-                          </Button>
-                        </Link>
-                        <form action={deleteAnggota.bind(null, a.id)}>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            type="submit"
-                            className="h-8 px-2.5 text-xs"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            Hapus
-                          </Button>
-                        </form>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {anggota.length === 0 && (
-            <div className="px-6 py-12 text-center text-slate-500">
-              <AlertCircle className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-              <p className="text-sm font-medium">Belum ada anggota terdaftar.</p>
-              <Link href="/admin/anggota/create" className="mt-3 inline-block">
-                <Button size="sm">
-                  <UserPlus className="w-4 h-4" />
-                  Tambah Anggota Pertama
-                </Button>
+              <Link
+                href="/admin/anggota/create"
+                className="inline-flex items-center justify-center gap-1.5 h-8.5 sm:h-10 px-2.5 sm:px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold shadow-md shadow-emerald-600/20 transition-all cursor-pointer shrink-0"
+              >
+                <UserPlus className="w-4 h-4 text-white" />
+                <span className="hidden xs:inline">Tambah Anggota</span>
+                <span className="xs:hidden">Tambah</span>
               </Link>
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 relative z-10">
+        <AnggotaListClient initialAnggota={anggota as unknown as AnggotaListItem[]} />
+      </main>
     </div>
   );
 }

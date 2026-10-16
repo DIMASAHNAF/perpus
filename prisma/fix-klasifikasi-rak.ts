@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import fs from "fs";
 
 /**
  * Isi klasifikasi DDC untuk 15 buku existing, lalu assign rakId ke eksemplar.
@@ -21,7 +20,7 @@ const KLASIFIKASI: { judul: string; klasifikasi: string }[] = [
   { judul: "Filosofi Kopi", klasifikasi: "899.221" },
   { judul: "Dilan 1990", klasifikasi: "899.221" },
   { judul: "Rindu", klasifikasi: "899.221" },
-  { judul: "Sebuah Seni untuk Bersikap Bodo Amat", klasifikasi: "158" },   // self-help
+  { judul: "Sebuah Seni untuk Bersikap apatis", klasifikasi: "158" },   // self-help
   { judul: "Atomic Habits", klasifikasi: "158" },
   { judul: "Berani Tidak Disukai", klasifikasi: "158.1" },
   { judul: "Man's Search for Meaning", klasifikasi: "150.1" },            // psikologi eksistensial
@@ -58,9 +57,10 @@ async function main() {
   for (const e of eks) {
     const num = parseKlasifikasi(e.buku.klasifikasi);
     if (num === null) continue;
-    const rak = rakList.find((r) => num >= r.klasifikasi_min && num <= r.klasifikasi_max);
+    const rak = rakList.find( (r) => num >= r.klasifikasi_min && num <= r.klasifikasi_max);
     if (!rak) continue;
 
+    
     await prisma.eksemplar.update({ where: { id: e.id }, data: { rakId: rak.id } });
     updated++;
     console.log(`   ${e.kode} -> ${rak.nama} (${e.buku.klasifikasi})`);
